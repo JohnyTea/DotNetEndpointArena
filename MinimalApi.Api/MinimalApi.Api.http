@@ -1,0 +1,38 @@
+@MinimalApi.Api_HostAddress = http://localhost:5163
+
+GET {{MinimalApi.Api_HostAddress}}/hello
+Accept: application/json
+
+###
+
+GET {{MinimalApi.Api_HostAddress}}/todos/5
+Accept: application/json
+
+###
+
+Post {{MinimalApi.Api_HostAddress}}/todos
+Content-Type: application/json
+Accept-Language: en-US,en;q=0.5
+{
+  "title": "todo-{{$timestamp}}",
+  "notes": "created from .http",
+  "done": false
+}
+
+###
+
+
+Get {{MinimalApi.Api_HostAddress}}/todos
+Accept: application/json
+
+###
+
+Get {{MinimalApi.Api_HostAddress}}/todos/large
+Accept: application/json
+
+###
+
+Get {{MinimalApi.Api_HostAddress}}/compute
+Accept: application/json
+
+###

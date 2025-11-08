@@ -1,0 +1,6 @@
+@DotNet_Endpoint_Arena_HostAddress = http://localhost:5265
+
+GET {{DotNet_Endpoint_Arena_HostAddress}}/Hello/
+Accept: application/json
+
+###

@@ -1,0 +1,6 @@
+@Carter.Api_HostAddress = http://localhost:5005
+
+GET {{Carter.Api_HostAddress}}/Home
+Accept: application/json
+
+###

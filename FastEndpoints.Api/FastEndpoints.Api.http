@@ -1,0 +1,6 @@
+@FastEndpoints.Api_HostAddress = http://localhost:5223
+
+GET {{FastEndpoints.Api_HostAddress}}/Hello
+Accept: application/json
+
+###
