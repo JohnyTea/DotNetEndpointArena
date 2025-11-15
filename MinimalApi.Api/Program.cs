@@ -20,11 +20,11 @@ app.UseHttpsRedirection();
 
 app.MapGet("/hello", (IHelloWorldService helloWorldService) => Results.Ok(helloWorldService.GetHelloWorld()));
 
-app.MapGet("/todos/{id:int}", (int id, ITodosService svc) =>
+app.MapGet("/todos/{id:int}", async (int id, ITodosService svc) =>
 {
     try
     {
-        var todo = svc.GetById(id);
+        var todo = await svc.GetById(id);
         return Results.Ok(todo);
     }
     catch (KeyNotFoundException)
@@ -39,21 +39,21 @@ app.MapPost("/todos", (TodoCreateReq req, ITodosService svc) =>
     return Results.NoContent();
 });
 
-app.MapGet("/todos", (ITodosService svc) =>
+app.MapGet("/todos", async (ITodosService svc) =>
 {
-    var list = svc.GetList();
+    var list = await svc.GetList();
     return Results.Ok(list);
 });
 
-app.MapGet("/todos/large", (ITodosService svc) =>
+app.MapGet("/todos/large", async (ITodosService svc) =>
 {
-    var big = svc.GetBigList();
+    var big = await svc.GetBigList();
     return Results.Ok(big);
 });
 
-app.MapGet("/compute", (ITodosService svc) =>
+app.MapGet("/compute", async (ITodosService svc) =>
 {
-    var sum = svc.Compute();
+    var sum = await svc.Compute();
     return Results.Ok(new { sum });
 });
 

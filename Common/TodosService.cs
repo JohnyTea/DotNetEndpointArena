@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,11 +13,11 @@ public record TodoCreateReq(string Title, string? Notes, bool Done);
 
 public interface ITodosService
 {
-    Todo GetById(int id);
-    void Create(TodoCreateReq toCreate);
-    IReadOnlyCollection<Todo> GetList();
-    IReadOnlyCollection<Todo> GetBigList();
-    long Compute();
+    Task<Todo> GetById(int id);
+    Task Create(TodoCreateReq toCreate);
+    Task<IReadOnlyCollection<Todo>> GetList();
+    Task<IReadOnlyCollection<Todo>> GetBigList();
+    Task<long> Compute();
 }
 
 internal class TodosService : ITodosService
@@ -27,23 +29,51 @@ internal class TodosService : ITodosService
         _db = db;
     }
 
-    public long Compute()
+    public Task<long> Compute()
     {
-        const long N = 5_000_000_000;
-        long sum = 0;
-        for (long i = 1; i <= N; i++)
+        return Task.Run(() =>
         {
-            sum += i;
-        }
-        return sum;
-    }
-    public Todo GetById(int id)
-    {
-        return _db.Todos.FirstOrDefault(t => t.Id == id)
-           ?? throw new KeyNotFoundException($"Todo {id} not found.");
+            var targetMs = 10_000;
+            var sw = Stopwatch.StartNew();
+
+            var buffer = new byte[8192];
+            Random.Shared.NextBytes(buffer);
+
+            using var sha = SHA256.Create();
+
+            long hashes = 0;
+
+            while (true)
+            {
+                for (int i = 0; i < 4096; i++)
+                {
+                    var hash = sha.ComputeHash(buffer);           
+                                                                
+                    Buffer.BlockCopy(hash, 0, buffer,
+                        (int) ((hashes * 13) % (buffer.Length - hash.Length)),
+                        hash.Length);
+                    hashes++;
+                }
+
+                if (sw.ElapsedMilliseconds >= targetMs)
+                {
+                    break;
+                }
+            }
+
+            return hashes;
+        });
     }
 
-    public void Create(TodoCreateReq toCreate)
+    public Task<Todo> GetById(int id)
+    {
+        var todo = _db.Todos.FirstOrDefault(t => t.Id == id);
+        if (todo is null)
+            return Task.FromException<Todo>(new KeyNotFoundException($"Todo {id} not found."));
+        return Task.FromResult(todo);
+    }
+
+    public Task Create(TodoCreateReq toCreate)
     {
         // naive ID generation for testing; for EF you'd usually let the DB assign it
         var nextId = -1;
@@ -51,15 +81,20 @@ internal class TodosService : ITodosService
 
         _db.Add(entity);
         _db.SaveChanges();
+        return Task.CompletedTask;
     }
 
-    public IReadOnlyCollection<Todo> GetList()
+    public Task<IReadOnlyCollection<Todo>> GetList()
     {
-        return [.. _db.Todos];
+        IReadOnlyCollection<Todo> list = _db.Todos.ToArray();
+        return Task.FromResult(list);
     }
 
-    public IReadOnlyCollection<Todo> GetBigList()
+    public Task<IReadOnlyCollection<Todo>> GetBigList()
     {
-        return _db.TodosBig.ToArray();
+        IReadOnlyCollection<Todo> list = _db.TodosBig.ToArray();
+        return Task.FromResult(list);
     }
 }
+
+    

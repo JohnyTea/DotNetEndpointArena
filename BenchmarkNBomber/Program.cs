@@ -1,17 +1,14 @@
-﻿// Program.cs
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using NBomber.Contracts.Stats;
 using NBomber.CSharp;
 
 var baseUrl = args.Length > 0 ? args[0].TrimEnd('/') : "https://localhost:7227/";
-Console.WriteLine($"Target: {baseUrl}");
 
 var json = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 var http = new HttpClient { BaseAddress = new Uri(baseUrl) };
 
 
-// ---------- Scenarios ----------
 var helloScenario = Scenario.Create("hello", async ctx =>
 {
     var res = await http.GetAsync("/hello");
@@ -35,7 +32,6 @@ var getByIdScenario = Scenario.Create("get_by_id", async ctx =>
 var getListScenario = Scenario.Create("get_list", async ctx =>
     {
         var res = await http.GetAsync("/todos");
-        // record payload size if present (helps bandwidth stats)
         var size = (int) Math.Min(res.Content.Headers.ContentLength ?? 0, int.MaxValue);
         return res.IsSuccessStatusCode ? Response.Ok(sizeBytes: size) : Response.Fail();
     })
@@ -55,12 +51,11 @@ var writeLightScenario = Scenario.Create("writes_light", async ctx =>
 
         using var content = new StringContent(body, Encoding.UTF8, "application/json");
         var res = await http.PostAsync("/todos", content);
-        // your endpoint returns 204 No Content
+
         return (int) res.StatusCode == 204 ? Response.Ok() : Response.Fail();
     })
     .WithWarmUpDuration(TimeSpan.FromSeconds(60))
     .WithLoadSimulations(
-        // low write concurrency to avoid runaway growth if a real DB is used
         Simulation.KeepConstant(copies: 16, during: TimeSpan.FromSeconds(60))
     );
 
@@ -72,7 +67,6 @@ var bigPayloadScenario = Scenario.Create("big_payload", async ctx =>
     })
     .WithWarmUpDuration(TimeSpan.FromSeconds(60))
     .WithLoadSimulations(
-        // lower concurrency due to large JSON payloads
         Simulation.KeepConstant(copies: 32, during: TimeSpan.FromSeconds(60))
     );
 
