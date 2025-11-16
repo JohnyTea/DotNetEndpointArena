@@ -3,7 +3,7 @@ using System.Text.Json;
 using NBomber.Contracts.Stats;
 using NBomber.CSharp;
 
-var baseUrl = args.Length > 0 ? args[0].TrimEnd('/') : "https://localhost:7227/";
+var baseUrl = "https://localhost:7010/";
 
 var json = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 var http = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -72,7 +72,7 @@ var bigPayloadScenario = Scenario.Create("big_payload", async ctx =>
 
 var computeScenario = Scenario.Create("compute_only", async ctx =>
     {
-        var res = await http.GetAsync("/compute");
+        var res = await http.GetAsync("/todos/compute");
         return res.IsSuccessStatusCode ? Response.Ok() : Response.Fail();
     })
     .WithWarmUpDuration(TimeSpan.FromSeconds(60))
@@ -83,7 +83,7 @@ var computeScenario = Scenario.Create("compute_only", async ctx =>
 // ---------- Run ----------
 NBomberRunner
     .RegisterScenarios(helloScenario, getByIdScenario, getListScenario, writeLightScenario, bigPayloadScenario, computeScenario)
-    .WithReportFileName("endpointbench")
+    .WithReportFileName("apiEndpoints")
     .WithReportFolder("reports")
     .WithReportFormats(ReportFormat.Txt, ReportFormat.Html, ReportFormat.Csv)
     .Run();

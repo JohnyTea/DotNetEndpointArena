@@ -2,22 +2,21 @@ using Ardalis.ApiEndpoints;
 using Common;
 using Microsoft.AspNetCore.Mvc;
 
-public class HelloEndpoint : EndpointBaseSync
- .WithoutRequest
- .WithActionResult<string>
+public class GetHello : EndpointBaseSync
+    .WithoutRequest
+    .WithActionResult<string>
 {
-    public HelloEndpoint(IHelloWorldService helloWorldService)
+    private readonly IHelloWorldService _helloWorldService;
+
+    public GetHello(IHelloWorldService helloWorldService)
     {
-        HelloWorldService = helloWorldService;
+        _helloWorldService = helloWorldService;
     }
 
-    public IHelloWorldService HelloWorldService { get; }
-
-    [HttpGet("hello")]
+    [HttpGet("/hello")]
     public override ActionResult<string> Handle()
     {
-        // Your logic here
-
-        return HelloWorldService.GetHelloWorld();
+        var message = _helloWorldService.GetHelloWorld();
+        return Ok(message);
     }
 }
