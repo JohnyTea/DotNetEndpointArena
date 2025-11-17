@@ -1,19 +1,19 @@
-﻿using Common;
+using Common;
 
 namespace FastEndpoints.Api;
 
-public class HelloEndpoint : Endpoint<EmptyRequest, string>
+public class HelloEndpoint : EndpointWithoutRequest<string>
 {
-    public IHelloWorldService _helloService { get; set; }
+    public required IHelloWorldService HelloWorldService { get; set; }
 
     public override void Configure()
     {
-        Get("/Hello");
+        Get("/hello");
         AllowAnonymous();
     }
 
-    public override async Task HandleAsync(EmptyRequest req, CancellationToken tc)
+    public override async Task HandleAsync(CancellationToken ct)
     {
-        await Send.OkAsync(_helloService.GetHelloWorld());
+        await Send.OkAsync(HelloWorldService.GetHelloWorld(), ct);
     }
 }
