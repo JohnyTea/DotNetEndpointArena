@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common;
+﻿namespace Common;
 
 public record Todo(int Id, string Title, string? Notes, bool Done);
 public record TodoCreateReq(string Title, string? Notes, bool Done);
@@ -31,69 +23,41 @@ internal class TodosService : ITodosService
 
     public Task<long> Compute()
     {
-        return Task.Run(() =>
+        const int iterations = 50_000;
+
+        long sum = 0;
+        for (int i = 0; i < iterations; i++)
         {
-            var targetMs = 10_000;
-            var sw = Stopwatch.StartNew();
+            sum += i;
+        }
 
-            var buffer = new byte[8192];
-            Random.Shared.NextBytes(buffer);
-
-            using var sha = SHA256.Create();
-
-            long hashes = 0;
-
-            while (true)
-            {
-                for (int i = 0; i < 4096; i++)
-                {
-                    var hash = sha.ComputeHash(buffer);           
-                                                                
-                    Buffer.BlockCopy(hash, 0, buffer,
-                        (int) ((hashes * 13) % (buffer.Length - hash.Length)),
-                        hash.Length);
-                    hashes++;
-                }
-
-                if (sw.ElapsedMilliseconds >= targetMs)
-                {
-                    break;
-                }
-            }
-
-            return hashes;
-        });
+        return Task.FromResult(sum);
     }
 
     public Task<Todo> GetById(int id)
     {
         var todo = _db.Todos.FirstOrDefault(t => t.Id == id);
         if (todo is null)
-            return Task.FromException<Todo>(new KeyNotFoundException($"Todo {id} not found."));
+        {
+            throw new KeyNotFoundException($"Todo {id} not found.");
+        }
+
         return Task.FromResult(todo);
     }
 
     public Task Create(TodoCreateReq toCreate)
     {
-        // naive ID generation for testing; for EF you'd usually let the DB assign it
-        var nextId = -1;
-        var entity = new Todo(nextId, toCreate.Title, toCreate.Notes, toCreate.Done);
-
-        _db.Add(entity);
-        _db.SaveChanges();
         return Task.CompletedTask;
     }
 
     public Task<IReadOnlyCollection<Todo>> GetList()
     {
-        IReadOnlyCollection<Todo> list = _db.Todos.ToArray();
-        return Task.FromResult(list);
+        return Task.FromResult(_db.Todos);
     }
 
     public Task<IReadOnlyCollection<Todo>> GetBigList()
     {
-        IReadOnlyCollection<Todo> list = _db.TodosBig.ToArray();
-        return Task.FromResult(list);
+        return Task.FromResult(_db.TodosBig);
     }
 }
 

@@ -51,7 +51,7 @@ app.MapGet("/todos/large", async (ITodosService svc) =>
     return Results.Ok(big);
 });
 
-app.MapGet("/compute", async (ITodosService svc) =>
+app.MapGet("/todos/compute", async (ITodosService svc) =>
 {
     var sum = await svc.Compute();
     return Results.Ok(new { sum });

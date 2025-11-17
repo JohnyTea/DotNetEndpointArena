@@ -32,7 +32,7 @@ Accept: application/json
 
 ###
 
-Get {{MinimalApi.Api_HostAddress}}/compute
+Get {{MinimalApi.Api_HostAddress}}/todos/compute
 Accept: application/json
 
 ###

@@ -13,7 +13,7 @@ public class ComputeEndpoint : EndpointWithoutRequest<object>
 
     public override void Configure()
     {
-        Get("/compute");
+        Get("/todos/compute");
         AllowAnonymous();
     }
 

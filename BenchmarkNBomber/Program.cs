@@ -3,7 +3,10 @@ using System.Text.Json;
 using NBomber.Contracts.Stats;
 using NBomber.CSharp;
 
-var baseUrl = "https://localhost:7010/";
+int cpuCount = Environment.ProcessorCount;
+int targetCopies = cpuCount * 2;
+
+var baseUrl = "https://localhost:7227/";
 
 var json = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 var http = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -14,20 +17,34 @@ var helloScenario = Scenario.Create("hello", async ctx =>
     var res = await http.GetAsync("/hello");
     return res.IsSuccessStatusCode ? Response.Ok() : Response.Fail();
 })
-    .WithWarmUpDuration(TimeSpan.FromSeconds(60))
-    .WithLoadSimulations(
-        Simulation.KeepConstant(copies: 64, during: TimeSpan.FromSeconds(60))
-    );
+.WithWarmUpDuration(TimeSpan.FromSeconds(10))
+.WithLoadSimulations(
+    Simulation.RampingConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(20)
+    ),
+    Simulation.KeepConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(40)
+    )
+);
 
 var getByIdScenario = Scenario.Create("get_by_id", async ctx =>
     {
         var res = await http.GetAsync("/todos/1");
         return res.IsSuccessStatusCode ? Response.Ok() : Response.Fail();
     })
-    .WithWarmUpDuration(TimeSpan.FromSeconds(60))
-    .WithLoadSimulations(
-        Simulation.KeepConstant(copies: 64, during: TimeSpan.FromSeconds(60))
-    );
+.WithWarmUpDuration(TimeSpan.FromSeconds(10))
+.WithLoadSimulations(
+    Simulation.RampingConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(20)
+    ),
+    Simulation.KeepConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(40)
+    )
+);
 
 var getListScenario = Scenario.Create("get_list", async ctx =>
     {
@@ -35,10 +52,17 @@ var getListScenario = Scenario.Create("get_list", async ctx =>
         var size = (int) Math.Min(res.Content.Headers.ContentLength ?? 0, int.MaxValue);
         return res.IsSuccessStatusCode ? Response.Ok(sizeBytes: size) : Response.Fail();
     })
-    .WithWarmUpDuration(TimeSpan.FromSeconds(60))
-    .WithLoadSimulations(
-        Simulation.KeepConstant(copies: 64, during: TimeSpan.FromSeconds(60))
-    );
+.WithWarmUpDuration(TimeSpan.FromSeconds(10))
+.WithLoadSimulations(
+    Simulation.RampingConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(20)
+    ),
+    Simulation.KeepConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(40)
+    )
+);
 
 var writeLightScenario = Scenario.Create("writes_light", async ctx =>
     {
@@ -54,10 +78,17 @@ var writeLightScenario = Scenario.Create("writes_light", async ctx =>
 
         return (int) res.StatusCode == 204 ? Response.Ok() : Response.Fail();
     })
-    .WithWarmUpDuration(TimeSpan.FromSeconds(60))
-    .WithLoadSimulations(
-        Simulation.KeepConstant(copies: 16, during: TimeSpan.FromSeconds(60))
-    );
+.WithWarmUpDuration(TimeSpan.FromSeconds(10))
+.WithLoadSimulations(
+    Simulation.RampingConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(20)
+    ),
+    Simulation.KeepConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(40)
+    )
+);
 
 var bigPayloadScenario = Scenario.Create("big_payload", async ctx =>
     {
@@ -65,25 +96,74 @@ var bigPayloadScenario = Scenario.Create("big_payload", async ctx =>
         var size = (int) Math.Min(res.Content.Headers.ContentLength ?? 0, int.MaxValue);
         return res.IsSuccessStatusCode ? Response.Ok(sizeBytes: size) : Response.Fail();
     })
-    .WithWarmUpDuration(TimeSpan.FromSeconds(60))
-    .WithLoadSimulations(
-        Simulation.KeepConstant(copies: 32, during: TimeSpan.FromSeconds(60))
-    );
+.WithWarmUpDuration(TimeSpan.FromSeconds(10))
+.WithLoadSimulations(
+    Simulation.RampingConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(20)
+    ),
+    Simulation.KeepConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(40)
+    )
+);
 
 var computeScenario = Scenario.Create("compute_only", async ctx =>
     {
         var res = await http.GetAsync("/todos/compute");
         return res.IsSuccessStatusCode ? Response.Ok() : Response.Fail();
     })
-    .WithWarmUpDuration(TimeSpan.FromSeconds(60))
-    .WithLoadSimulations(
-        Simulation.KeepConstant(copies: 32, during: TimeSpan.FromSeconds(60))
-    );
+.WithWarmUpDuration(TimeSpan.FromSeconds(10))
+.WithLoadSimulations(
+    Simulation.RampingConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(20)
+    ),
+    Simulation.KeepConstant(
+        copies: targetCopies,
+        during: TimeSpan.FromSeconds(40)
+    )
+);
 
 // ---------- Run ----------
 NBomberRunner
-    .RegisterScenarios(helloScenario, getByIdScenario, getListScenario, writeLightScenario, bigPayloadScenario, computeScenario)
-    .WithReportFileName("apiEndpoints")
+    .RegisterScenarios(helloScenario)
+    .WithReportFileName("helloScenario.MinimalApi")
     .WithReportFolder("reports")
-    .WithReportFormats(ReportFormat.Txt, ReportFormat.Html, ReportFormat.Csv)
+    .WithReportFormats(ReportFormat.Html)
+    .Run();
+
+NBomberRunner
+    .RegisterScenarios(getByIdScenario)
+    .WithReportFileName("getByIdScenario.MinimalApi")
+    .WithReportFolder("reports")
+    .WithReportFormats(ReportFormat.Html)
+    .Run();
+
+NBomberRunner
+    .RegisterScenarios(getListScenario)
+    .WithReportFileName("getListScenario.MinimalApi")
+    .WithReportFolder("reports")
+    .WithReportFormats(ReportFormat.Html)
+    .Run();
+
+NBomberRunner
+    .RegisterScenarios(writeLightScenario)
+    .WithReportFileName("writeLightScenario.MinimalApi")
+    .WithReportFolder("reports")
+    .WithReportFormats(ReportFormat.Html)
+    .Run();
+
+NBomberRunner
+    .RegisterScenarios(bigPayloadScenario)
+    .WithReportFileName("bigPayloadScenario.MinimalApi")
+    .WithReportFolder("reports")
+    .WithReportFormats(ReportFormat.Html)
+    .Run();
+
+NBomberRunner
+    .RegisterScenarios(computeScenario)
+    .WithReportFileName("computeScenario.MinimalApi")
+    .WithReportFolder("reports")
+    .WithReportFormats(ReportFormat.Html)
     .Run();

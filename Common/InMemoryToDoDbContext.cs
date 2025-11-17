@@ -1,38 +1,33 @@
-﻿using System.Collections.Concurrent;
-
-namespace Common;
+﻿namespace Common;
 
 public interface IToDoDbContext
 {
-    IQueryable<Todo> Todos { get; }
-    IQueryable<Todo> TodosBig { get; }
-
-    void Add(Todo todo);
-    int SaveChanges();
+    IReadOnlyCollection<Todo> Todos { get; }
+    IReadOnlyCollection<Todo> TodosBig { get; }
 }
 
 public sealed class InMemoryToDoDbContext : IToDoDbContext
 {
-    private readonly ConcurrentDictionary<int, Todo> _store = new();
-    private readonly ConcurrentDictionary<int, Todo> _storeBig = new();
+    private readonly IList<Todo> _store;
+    private readonly IList<Todo> _storeBig;
 
     public InMemoryToDoDbContext(int seedCount = 100)
     {
+
+        _store = [];
+        _storeBig = [];
+
         for (int i = 1; i <= seedCount; i++)
         {
-            _store[i] = new Todo(i, $"todo-{i}", i % 7 == 0 ? "note" : null, Done: i % 3 == 0);
+            _store.Add(new Todo(i, $"todo-{i}", i % 7 == 0 ? "note" : null, Done: i % 3 == 0));
         }
 
-        for (int i = 1; i <= seedCount * 1_000; i++)
+        for (int i = 1; i <= seedCount * 100; i++)
         {
-            _storeBig[i] = new Todo(i, $"todo-{i}", i % 7 == 0 ? "note" : null, Done: i % 3 == 0);
+            _storeBig.Add(new Todo(i, $"todo-{i}", i % 7 == 0 ? "note" : null, Done: i % 3 == 0));
         }
     }
 
-    public IQueryable<Todo> Todos => _store.Values.AsQueryable();
-    public IQueryable<Todo> TodosBig => _storeBig.Values.AsQueryable();
-
-    public void Add(Todo todo) => _store[todo.Id] = todo;
-
-    public int SaveChanges() => 1;
+    public IReadOnlyCollection<Todo> Todos => (IReadOnlyList<Todo>) _store;
+    public IReadOnlyCollection<Todo> TodosBig => (IReadOnlyList<Todo>) _storeBig;
 }
