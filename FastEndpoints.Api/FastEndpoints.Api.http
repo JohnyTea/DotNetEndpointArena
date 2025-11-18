@@ -31,7 +31,7 @@ Accept: application/json
 
 ###
 
-Get {{FastEndpointsV2.Apiv2_HostAddress}}/compute
+Get {{FastEndpointsV2.Apiv2_HostAddress}}/todos/compute
 Accept: application/json
 
 ###

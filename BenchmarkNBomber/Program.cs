@@ -6,7 +6,8 @@ using NBomber.CSharp;
 int cpuCount = Environment.ProcessorCount;
 int targetCopies = cpuCount * 2;
 
-var baseUrl = "https://localhost:7227/";
+var baseUrl = "https://localhost:7010/";
+var apiTested = "ApiEndpoints";
 
 var json = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 var http = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -128,42 +129,42 @@ var computeScenario = Scenario.Create("compute_only", async ctx =>
 // ---------- Run ----------
 NBomberRunner
     .RegisterScenarios(helloScenario)
-    .WithReportFileName("helloScenario.MinimalApi")
-    .WithReportFolder("reports")
+    .WithReportFileName($"helloScenario.{apiTested}")
+    .WithReportFolder("reports_helloScenario")
     .WithReportFormats(ReportFormat.Html)
     .Run();
 
 NBomberRunner
     .RegisterScenarios(getByIdScenario)
-    .WithReportFileName("getByIdScenario.MinimalApi")
-    .WithReportFolder("reports")
+    .WithReportFileName($"getByIdScenario.{apiTested}")
+    .WithReportFolder("reports_getByIdScenario")
     .WithReportFormats(ReportFormat.Html)
     .Run();
 
 NBomberRunner
     .RegisterScenarios(getListScenario)
-    .WithReportFileName("getListScenario.MinimalApi")
-    .WithReportFolder("reports")
+    .WithReportFileName($"getListScenario.{apiTested}")
+    .WithReportFolder("reports_getListScenario")
     .WithReportFormats(ReportFormat.Html)
     .Run();
 
 NBomberRunner
     .RegisterScenarios(writeLightScenario)
-    .WithReportFileName("writeLightScenario.MinimalApi")
-    .WithReportFolder("reports")
+    .WithReportFileName($"writeLightScenario.{apiTested}")
+    .WithReportFolder("reports_writeLightScenario")
     .WithReportFormats(ReportFormat.Html)
     .Run();
 
 NBomberRunner
     .RegisterScenarios(bigPayloadScenario)
-    .WithReportFileName("bigPayloadScenario.MinimalApi")
-    .WithReportFolder("reports")
+    .WithReportFileName($"bigPayloadScenario.{apiTested}")
+    .WithReportFolder("reports_bigPayloadScenario")
     .WithReportFormats(ReportFormat.Html)
     .Run();
 
 NBomberRunner
     .RegisterScenarios(computeScenario)
-    .WithReportFileName("computeScenario.MinimalApi")
-    .WithReportFolder("reports")
+    .WithReportFileName($"computeScenario.{apiTested}")
+    .WithReportFolder("reports_computeScenario")
     .WithReportFormats(ReportFormat.Html)
     .Run();
