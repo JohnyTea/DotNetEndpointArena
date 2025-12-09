@@ -19,7 +19,7 @@ All frameworks expose the same routes:
 - `GET /todos`
 - `GET /todos/large`
 - `POST /todos`
-- `GET /compute`
+- `GET /todos/compute`
 
 ## NBomber scenarios
 
@@ -32,12 +32,5 @@ NBomber scenarios hit each route:
 - `big_payload`
 - `compute_only`
 
-Reports are written to `./reports` in HTML/CSV/TXT.
-
-To avoid overwriting reports between runs, use unique names, e.g.:
-
-```csharp
-.WithReportFolder("reports")
-.WithReportFileName($"MinimalApi_{DateTime.UtcNow:yyyyMMdd_HHmmss}")
-
+Reports are written to `./reports` in HTML.
 
